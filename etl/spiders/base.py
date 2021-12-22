@@ -1,4 +1,5 @@
 from typing import Optional
+import unicodedata
 
 import scrapy
 from scrapy.http import HtmlResponse
@@ -19,7 +20,7 @@ class BaseSpider(scrapy.Spider):  # noqa
     @staticmethod
     def extract(response: HtmlResponse, query: str) -> Optional[str]:
         if (result := response.xpath(query).get()) is not None:
-            return result.strip()
+            return unicodedata.normalize("NFKD", result.strip())
 
     def start_requests(self):
         yield scrapy.Request(

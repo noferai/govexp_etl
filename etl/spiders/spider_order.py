@@ -4,6 +4,7 @@ import scrapy
 from scrapy.http import HtmlResponse
 
 from etl.spiders.base import BaseSpider
+from etl.items import OrderItem, Organization, ContactInfo
 from etl.utils import add_domain
 
 
@@ -14,7 +15,7 @@ class OrderSpider(BaseSpider):  # noqa
     def push_documents(self, response: HtmlResponse):
         for document in response.xpath("//div[contains(@class, 'search-registry-entry-block')]"):
             url = add_domain(self.extract(document, ".//div[@class='registry-entry__header-mid__number']/a/@href"))
-            notice_number = parse.parse_qs(parse.urlsplit(url).query).get("regNumber")[0]  # noqa
+            reg_number = parse.parse_qs(parse.urlsplit(url).query).get("regNumber")[0]  # noqa
             status = self.extract(document, ".//div[@class='registry-entry__header-mid__title']/text()")
             obj = self.extract(document, ".//div[@class='registry-entry__body-value']/text()")
             organization_name = self.extract(document, ".//div[@class='registry-entry__body-href']/a/text()")
@@ -36,7 +37,7 @@ class OrderSpider(BaseSpider):  # noqa
                     url=url,
                     status=status,
                     obj=obj,
-                    notice_number=notice_number,
+                    reg_number=reg_number,
                     notice_url=url,
                     created=created,
                     updated=updated,
@@ -59,7 +60,7 @@ class OrderSpider(BaseSpider):  # noqa
             callback=self.parse_employer,
             dont_filter=True,
             cb_kwargs=dict(
-                contact=dict(
+                contact=ContactInfo(
                     person=contact.get("Ответственное должностное лицо"),
                     email=contact.get("Адрес электронной почты"),
                     phone=contact.get("Номер контактного телефона"),
@@ -82,7 +83,7 @@ class OrderSpider(BaseSpider):  # noqa
             callback=self.parse_employer,
             dont_filter=True,
             cb_kwargs=dict(
-                contact=dict(
+                contact=ContactInfo(
                     person=sections_dict.get("Контактное лицо"),
                     email=sections_dict.get("Электронная почта"),
                     phone=sections_dict.get("Телефон"),
@@ -101,4 +102,4 @@ class OrderSpider(BaseSpider):  # noqa
         address = self.extract(info, "//div[@class='registry-entry__body-value']/text()")
 
         employer_ = kwargs.pop("employer")
-        yield dict(employer=dict(ogrn=ogrn, inn=inn, kpp=kpp, address=address, **employer_), **kwargs)
+        yield OrderItem(employer=Organization(ogrn=ogrn, inn=inn, kpp=kpp, address=address, **employer_), **kwargs)

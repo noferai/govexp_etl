@@ -1,4 +1,5 @@
-from datetime import datetime as dt
+from typing import Optional
+import datetime as dt
 
 import pydantic
 import scrapy
@@ -14,9 +15,9 @@ class Organization(pydantic.BaseModel):
 
 
 class ContactInfo(pydantic.BaseModel):
-    person: str
-    email: pydantic.EmailStr
-    phone: str
+    person: Optional[str]
+    email: Optional[pydantic.EmailStr]
+    phone: Optional[str]
 
 
 class OrderItem(pydantic.BaseModel):
@@ -30,7 +31,18 @@ class OrderItem(pydantic.BaseModel):
     currency: str
     created: dt.date
     updated: dt.date
-    end_date: dt.date
+    end_date: Optional[dt.date]
+
+    @pydantic.root_validator(pre=True)
+    def parse_price(cls, values: dict):
+        values["currency"] = values["starting_price"][-1]
+        values["starting_price"] = float(values["starting_price"][:-1].replace(" ", "").replace(",", "."))
+        return values
+
+    @pydantic.validator("created", "updated", "end_date", pre=True)
+    def parse_date(cls, value: Optional[str]) -> Optional[dt.date]:
+        if value is not None:
+            return dt.datetime.strptime(value, "%d.%m.%Y").date()
 
 
 class ContractItem(scrapy.Item):
