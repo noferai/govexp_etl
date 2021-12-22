@@ -1,0 +1,1 @@
+domain = "zakupki.gov.ru"
