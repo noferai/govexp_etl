@@ -4,6 +4,8 @@ import datetime as dt
 import pydantic
 import scrapy
 
+from etl.utils import ascii_dumps
+
 
 class Organization(pydantic.BaseModel):
     url: pydantic.HttpUrl
@@ -28,14 +30,15 @@ class OrderItem(pydantic.BaseModel):
     employer: Organization
     contact: ContactInfo
     starting_price: float
-    currency: str
     created: dt.date
     updated: dt.date
     end_date: Optional[dt.date]
 
+    class Config:
+        json_dumps = ascii_dumps
+
     @pydantic.root_validator(pre=True)
     def parse_price(cls, values: dict):
-        values["currency"] = values["starting_price"][-1]
         values["starting_price"] = float(values["starting_price"][:-1].replace(" ", "").replace(",", "."))
         return values
 

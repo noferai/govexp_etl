@@ -1,3 +1,5 @@
+import os
+
 # Scrapy settings for etl project
 #
 # For simplicity, this file contains only settings considered important or
@@ -63,7 +65,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    "etl.pipelines.JsonPipeline": 300,
+    "etl.pipelines.ElasticInsertPipeline": 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -86,3 +88,12 @@ ITEM_PIPELINES = {
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+ES_PORT = os.getenv("ES_PORT")
+ES_USER = os.getenv("ES_USER")
+ES_PASS = os.getenv("ES_PASS")
+ES_HOST = os.getenv("ES_HOST")

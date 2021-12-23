@@ -1,14 +1,19 @@
 from urllib import parse
+import json
+import pathlib
 
 import scrapy
 from scrapy.http import HtmlResponse
 
 from etl.spiders.base import BaseSpider
+from etl.settings import ROOT_DIR
 from etl.items import OrderItem, Organization, ContactInfo
 from etl.utils import add_domain
 
 
 class OrderSpider(BaseSpider):  # noqa
+    es_index_id = "orders"
+    mapping = json.loads(pathlib.Path(f"{ROOT_DIR}/static/mappings/order.json").read_text())
     name = "OrderSpider"
     url_to_parse = "https://zakupki.gov.ru/epz/order/extendedsearch/results.html"
 

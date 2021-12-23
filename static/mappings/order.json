@@ -1,0 +1,71 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": "1",
+      "number_of_replicas": "1"
+    }
+  },
+  "mappings": {
+    "properties": {
+      "reg_number": {
+        "type": "keyword"
+      },
+      "url": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "obj": {
+        "type": "keyword"
+      },
+      "employer": {
+        "properties": {
+          "url": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "keyword"
+          },
+          "inn": {
+            "type": "keyword"
+          },
+          "kpp": {
+            "type": "keyword"
+          },
+          "ogrn": {
+            "type": "keyword"
+          },
+          "address": {
+            "type": "keyword"
+          }
+        }
+      },
+      "contact": {
+        "properties": {
+          "person": {
+            "type": "keyword"
+          },
+          "email": {
+            "type": "keyword"
+          },
+          "phone": {
+            "type": "keyword"
+          }
+        }
+      },
+      "starting_price": {
+        "type": "long"
+      },
+      "created": {
+        "type": "date"
+      },
+      "updated": {
+        "type": "date"
+      },
+      "end_date": {
+        "type": "date"
+      }
+    }
+  }
+}
