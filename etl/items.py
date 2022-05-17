@@ -1,10 +1,24 @@
-from typing import Optional
 import datetime as dt
+from typing import Optional, Union
 
 import pydantic
-import scrapy
 
 from etl.utils import ascii_dumps
+
+
+def to_dt(value: Optional[str]) -> Optional[dt.date]:
+    if value is not None:
+        try:
+            date = dt.datetime.strptime(value, "%d.%m.%Y").date()
+        except ValueError:
+            date = value
+        return date
+
+
+def parse_date(*fields: str) -> classmethod:
+    decorator = pydantic.validator(*fields, allow_reuse=True, pre=True)
+    validator = decorator(to_dt)
+    return validator
 
 
 class Organization(pydantic.BaseModel):
@@ -22,35 +36,43 @@ class ContactInfo(pydantic.BaseModel):
     phone: Optional[str]
 
 
-class OrderItem(pydantic.BaseModel):
+class DatePeriod(pydantic.BaseModel):
+    start: dt.date
+    end: dt.date
+
+    _start_end: classmethod = parse_date("start", "end")
+
+
+class Item(pydantic.BaseModel):
     reg_number: str
+    price: float
     url: pydantic.HttpUrl
-    status: str
-    obj: str
+    status: str | None
     employer: Organization
-    contact: ContactInfo
-    starting_price: float
     created: dt.date
     updated: dt.date
-    end_date: Optional[dt.date]
+    date: dt.date | None
+
+    _dates: classmethod = parse_date("created", "updated", "date")
 
     class Config:
         json_dumps = ascii_dumps
 
-    @pydantic.root_validator(pre=True)
-    def parse_price(cls, values: dict):
-        values["starting_price"] = float(values["starting_price"][:-1].replace(" ", "").replace(",", "."))
-        return values
-
-    @pydantic.validator("created", "updated", "end_date", pre=True)
-    def parse_date(cls, value: Optional[str]) -> Optional[dt.date]:
-        if value is not None:
-            return dt.datetime.strptime(value, "%d.%m.%Y").date()
+    @pydantic.validator("price", pre=True)
+    def parse_price(cls, value: str) -> float:
+        return float(value[:-1].replace(" ", "").replace(",", "."))
 
 
-class ContractItem(scrapy.Item):
-    pass
+class OrderItem(Item):
+    obj: str
+    contact: ContactInfo
 
 
-class AgreementItem(scrapy.Item):
-    pass
+class ContractItem(Item):
+    contract: str
+    execution_period: Union[DatePeriod, str]
+
+
+class AgreementItem(Item):
+    agreement: str
+    execution_period: Union[DatePeriod, str]

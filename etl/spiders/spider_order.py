@@ -1,13 +1,14 @@
-from urllib import parse
+import re
 import json
 import pathlib
+from urllib import parse
 
 import scrapy
 from scrapy.http import HtmlResponse
 
-from etl.spiders.base import BaseSpider
-from etl.settings import ROOT_DIR
 from etl.items import OrderItem, Organization, ContactInfo
+from etl.settings import ROOT_DIR
+from etl.spiders.base import BaseSpider
 from etl.utils import add_domain
 
 
@@ -20,8 +21,10 @@ class OrderSpider(BaseSpider):  # noqa
     def push_documents(self, response: HtmlResponse):
         for document in response.xpath("//div[contains(@class, 'search-registry-entry-block')]"):
             url = add_domain(self.extract(document, ".//div[@class='registry-entry__header-mid__number']/a/@href"))
-            reg_number = parse.parse_qs(parse.urlsplit(url).query).get("regNumber")[0]  # noqa
-            status = self.extract(document, ".//div[@class='registry-entry__header-mid__title']/text()")
+            reg_number = re.search(
+                r"\d+", self.extract(document, ".//div[@class='registry-entry__header-mid__number']/a/text()")
+            )[0]
+            status = self.extract(document, ".//div[@class='registry-entry__header-mid__title text-normal']/text()")
             obj = self.extract(document, ".//div[@class='registry-entry__body-value']/text()")
             organization_name = self.extract(document, ".//div[@class='registry-entry__body-href']/a/text()")
             organization_url = add_domain(self.extract(document, ".//div[@class='registry-entry__body-href']/a/@href"))
@@ -29,10 +32,10 @@ class OrderSpider(BaseSpider):  # noqa
             starting_price = self.extract(document, "//div[@class='price-block__value']/text()")
             dates = document.xpath(".//div[@class='data-block__value']/text()").getall()
             try:
-                created, updated, end_date = dates
+                created, updated, deadline = dates
             except ValueError:
                 created, updated = dates
-                end_date = None
+                deadline = None
 
             yield scrapy.Request(
                 url=url,
@@ -46,8 +49,8 @@ class OrderSpider(BaseSpider):  # noqa
                     notice_url=url,
                     created=created,
                     updated=updated,
-                    end_date=end_date,
-                    starting_price=starting_price,
+                    date=deadline,
+                    price=starting_price,
                     employer=dict(name=organization_name, url=organization_url),
                 ),
             )

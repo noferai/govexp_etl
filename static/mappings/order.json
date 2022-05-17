@@ -54,7 +54,7 @@
           }
         }
       },
-      "starting_price": {
+      "price": {
         "type": "long"
       },
       "created": {
@@ -63,7 +63,7 @@
       "updated": {
         "type": "date"
       },
-      "end_date": {
+      "date": {
         "type": "date"
       }
     }

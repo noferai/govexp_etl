@@ -1,9 +1,10 @@
-from scrapy.http import HtmlResponse
 import json
 import pathlib
 
-from etl.spiders.base import BaseSpider
+from scrapy.http import HtmlResponse
+
 from etl.settings import ROOT_DIR
+from etl.spiders.base import BaseSpider
 
 
 class ContractSpider(BaseSpider):  # noqa

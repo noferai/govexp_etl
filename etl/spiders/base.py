@@ -1,5 +1,5 @@
-from typing import Optional
 import unicodedata
+from typing import Optional
 
 import scrapy
 from scrapy.http import HtmlResponse
@@ -24,7 +24,9 @@ class BaseSpider(scrapy.Spider):  # noqa
 
     def start_requests(self):
         yield scrapy.Request(
-            url=f"{self.url_to_parse}?pageNumber=1&recordsPerPage=_100", callback=self.push_pages, dont_filter=True
+            url=f"{self.url_to_parse}?pageNumber=1&recordsPerPage=_{self.records_per_page}",
+            callback=self.push_pages,
+            dont_filter=True,
         )
 
     def push_pages(self, response: HtmlResponse):

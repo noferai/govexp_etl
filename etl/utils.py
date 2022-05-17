@@ -1,5 +1,6 @@
-from etl.constants import domain
 import json
+
+from etl.constants import domain
 
 
 def add_domain(link: str):
