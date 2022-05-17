@@ -75,4 +75,4 @@ class ContractItem(Item):
 
 class AgreementItem(Item):
     agreement: str
-    execution_period: Union[DatePeriod, str]
+    execution_period: DatePeriod

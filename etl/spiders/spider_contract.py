@@ -9,7 +9,7 @@ from etl.spiders.base import BaseSpider
 
 class ContractSpider(BaseSpider):  # noqa
     es_index_id = "contracts"
-    mapping = json.loads(pathlib.Path(f"{ROOT_DIR}/static/mappings/order.json").read_text())
+    mapping = json.loads(pathlib.Path(f"{ROOT_DIR}/static/mappings/contracts.json").read_text())
     name = "ContractSpider"
     url_to_parse = "https://zakupki.gov.ru/epz/contract/search/results.html"
 

@@ -1,7 +1,6 @@
-import re
 import json
 import pathlib
-from urllib import parse
+import re
 
 import scrapy
 from scrapy.http import HtmlResponse
